@@ -24,3 +24,5 @@ configuration:
           type: string
         name:
           type: string
+    releasenotes:
+      type: boolean

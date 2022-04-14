@@ -13,7 +13,7 @@ With no options, tags the `$BUILDKITE_BRANCH` and pushes the tags, with a commit
 steps:
   - command: make
     plugins:
-      - tendnz/git-tag#v1.0.7:
+      - tendnz/git-tag#v1.0.11:
           version: "v1.0.0-prod" 
 ```
 
@@ -23,12 +23,13 @@ With all options customized:
 steps:
   - command: make
     plugins:
-      - tendnz/git-tag#v1.0.7:
+      - tendnz/git-tag#v1.0.11:
           version: "v1.0.0-prod"
           message: "Release to $ENV [$BUILDKITE_BUILD_NUMBER]"
           githubtoken: $MY_GITHUB_TOKEN
           reponame: tendnz/my-repo-name
           prerelease: true
+          releasenotes: true
           user:
             - name: Bob Monkey
             - email: bob@codemonkeys.com
@@ -73,6 +74,10 @@ steps:
 - **user.name** (optional)
 
     If given, will configure the git user name for the repo.
+
+- **releasenotes** (optional, defaults to `false`)
+
+    Generate release notes or not.
 
 
 ## Tests / Linting

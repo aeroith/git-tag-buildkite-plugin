@@ -14,6 +14,7 @@ username=${BUILDKITE_PLUGIN_GIT_TAG_USER_1_NAME:-${BUILDKITE_BUILD_CREATOR}}
 email=${BUILDKITE_PLUGIN_GIT_TAG_USER_0_EMAIL:-${BUILDKITE_BUILD_CREATOR_EMAIL}}
 prerelease=${BUILDKITE_PLUGIN_GIT_TAG_PRERELEASE:-false}
 draft=${BUILDKITE_PLUGIN_GIT_TAG_DRAFT:-false}
+releasenotes=${BUILDKITE_PLUGIN_GIT_TAG_RELEASENOTES:-false}
 
 env
 
@@ -31,6 +32,24 @@ echo "--- Tags pushed"
 if [[ -n ${BUILDKITE_PLUGIN_GIT_TAG_GITHUBTOKEN+x} ]]; then
   echo "--- Making a release"
 
+  if [[ $releasenotes == "true" ]]; then
+
+  git fetch --all --tags
+  latest_tag=$(git tag --sort=version:refname | grep -E '^v[0-9]' | tail -1)
+  echo "Generating release notes for $latest_tag ... $BUILDKITE_PLUGIN_GIT_TAG_VERSION"
+
+  generate_post_data_for_release()
+  {
+    cat <<EOF
+{
+  "tag_name": "$BUILDKITE_PLUGIN_GIT_TAG_VERSION",
+  "previous_tag_name": "$latest_tag"
+}
+EOF
+  }
+  echo "Create release notes $BUILDKITE_PLUGIN_GIT_TAG_VERSION for repo: $BUILDKITE_PLUGIN_GIT_TAG_REPONAME"
+  message=$(curl --data "$(generate_post_data_for_release)" -H "Authorization: token $BUILDKITE_PLUGIN_GIT_TAG_GITHUBTOKEN" "https://api.github.com/repos/$BUILDKITE_PLUGIN_GIT_TAG_REPONAME/releases/generate-notes" | jq ".body")
+  fi
 
   generate_post_data()
   {
@@ -38,7 +57,7 @@ if [[ -n ${BUILDKITE_PLUGIN_GIT_TAG_GITHUBTOKEN+x} ]]; then
 {
   "tag_name": "$BUILDKITE_PLUGIN_GIT_TAG_VERSION",
   "name": "$BUILDKITE_PLUGIN_GIT_TAG_VERSION",
-  "body": "$message",
+  "body": $message,
   "prerelease": $prerelease,
   "draft": $draft
 }
