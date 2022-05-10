@@ -35,7 +35,7 @@ if [[ -n ${BUILDKITE_PLUGIN_GIT_TAG_GITHUBTOKEN+x} ]]; then
   if [[ $releasenotes == "true" ]]; then
 
   git fetch --all --tags
-  latest_tag=$(git tag --sort=version:refname | grep -E '^v[0-9]' | tail -1)
+  latest_tag=$(git tag --sort=version:refname | grep -E '^v[0-9]' | tail -2 | head -1)
   echo "Generating release notes for $latest_tag ... $BUILDKITE_PLUGIN_GIT_TAG_VERSION"
 
   generate_post_data_for_release()
